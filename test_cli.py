@@ -47,3 +47,17 @@ merged_df = pd.merge(daraz_df, olx_df, on='product', suffixes=('_daraz', '_olx')
 
 print("\n--- MERGED DATA ---")
 print(merged_df)
+
+def vfm_winner(row):
+    if row['price_daraz'] < row['price_olx']:
+        return 'Daraz'
+    elif row['price_daraz'] > row['price_olx']:
+        return 'OLX'
+    else:
+        return 'Tie'
+
+merged_df['vfm_winner'] = merged_df.apply(vfm_winner, axis=1)
+print(merged_df[['product', 'price_daraz', 'price_olx', 'vfm_winner']])
+
+merged_df.to_excel("vfm_report.xlsx", index=False)
+print("VFM report saved to vfm_report.xlsx")
