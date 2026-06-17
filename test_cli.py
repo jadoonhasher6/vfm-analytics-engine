@@ -48,16 +48,23 @@ merged_df = pd.merge(daraz_df, olx_df, on='product', suffixes=('_daraz', '_olx')
 print("\n--- MERGED DATA ---")
 print(merged_df)
 
-def vfm_winner(row):
-    if row['price_daraz'] < row['price_olx']:
+def smart_vfm(row):
+    max_price = max(row['price_daraz'], row['price_olx'])
+    max_rating = max(row['rating_daraz'], row['rating_olx'])
+    daraz_price_score =1-row['price_daraz']/max_price
+    olx_price_score =1-row['price_olx']/max_price
+    daraz_rating_score = row['rating_daraz']/max_rating
+    olx_rating_score = row['rating_olx']/max_rating
+    daraz_score=(0.6*daraz_price_score)+(0.4*daraz_rating_score)
+    olx_score=(0.6*olx_price_score)+(0.4*olx_rating_score)
+
+    if daraz_score > olx_score:
         return 'Daraz'
-    elif row['price_daraz'] > row['price_olx']:
+    elif olx_score >daraz_score:
         return 'OLX'
     else:
         return 'Tie'
-
-merged_df['vfm_winner'] = merged_df.apply(vfm_winner, axis=1)
+merged_df['vfm_winner'] = merged_df.apply(smart_vfm, axis=1)
 print(merged_df[['product', 'price_daraz', 'price_olx', 'vfm_winner']])
-
 merged_df.to_excel("vfm_report.xlsx", index=False)
-print("VFM report saved to vfm_report.xlsx")
+print("Smart VFM report saved to vfm_report.xlsx")
